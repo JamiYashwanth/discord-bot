@@ -31,14 +31,19 @@ def scrape(contest_id,div):
             user_data.append(user)
 
     try:
-        wb=load_workbook(f'{contest_id}_rankings.xlsx')
+        wb=load_workbook(f'C:/Users/jamiy/PycharmProjects/pythonProject/contests_ranklists/{contest_id}_rankings.xlsx')
     except:
         wb = Workbook()
-        wb.save(f'{contest_id}_rankings.xlsx')
+        wb.save(f'C:/Users/jamiy/PycharmProjects/pythonProject/contests_ranklists/{contest_id}_rankings.xlsx')
     try:
         wb[f'Div {div}']
     except:
         wb.create_sheet(f'Div {div}')
+    try:
+        wb['Sheet']
+        del wb['Sheet']
+    except:
+        print()
     ws = wb[f'Div {div}']
     ws.delete_rows(0, ws.max_row - 1)
     row = ['Rank', 'Username', 'Total score', 'Total time']
@@ -46,6 +51,6 @@ def scrape(contest_id,div):
     if len(user_data) > 0:
         for data in user_data:
             ws.append(data)
-    wb.save(filename=f'{contest_id}_rankings.xlsx')
+    wb.save(f'C:/Users/jamiy/PycharmProjects/pythonProject/contests_ranklists/{contest_id}_rankings.xlsx')
 
 
