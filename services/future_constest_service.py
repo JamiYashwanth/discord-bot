@@ -9,8 +9,13 @@ def getFutureContest(url):
     parse_json = json.loads(data)
     return parse_json
 
-def contestHost(host):
+def convertToGoogleCalendarTime(t):
+    # https://calendar.google.com/calendar/u/0/r/eventedit?text=DOLO+650&dates=20220121T224000Z/20220122T221500Z&details=Can+set+your+prior+time&location=Waldorf+Astoria,+301+Park+Ave+,+New+York,+NY+10022&sf=true&output=xml
+    dt = datetime.strptime(t, "%Y-%m-%d %H:%M:%S %Z")
+    time_string_converted = dt.strftime("%Y%m%dT%H%M%SZ")
+    return time_string_converted
 
+def contestHost(host):
     em = '\N{EN SPACE}'
     sq = '\N{WHITE SQUARE WITH UPPER RIGHT QUADRANT}'
     newline = '\n\n'
@@ -24,10 +29,15 @@ def contestHost(host):
             contest_start_time = contest['start_time']
             contest_end_time = contest['end_time']
             contest_url = contest['url']
+            url_contest_name = contest_name.replace(" ", "+")
+            convertedStartTime = convertToGoogleCalendarTime(contest_start_time)
+            convertedEndTime = convertToGoogleCalendarTime(contest_end_time)
+            remind_me = "https://calendar.google.com/calendar/u/0/r/eventedit?text=" + url_contest_name + "&dates=" + convertedStartTime + "/" +  convertedEndTime
             desc += (f'`{em}{contest_name}{em}|'
             f'{em}{contest_start_time}{em}|'
              f'{em}{contest_end_time}{em}|'
-            f'{em}`[`link {sq}`]({contest_url} "Link to contest page")')
+            f'{em}`[`link {sq} `]({contest_url} "Link to contest page"){em}|')
+            desc += (f'{em}[`remind {sq}`]({remind_me})')
             desc += newline
         return desc
 
@@ -39,10 +49,17 @@ def contestHost(host):
             contest_start_time = datetime.strptime(contest['start_time'], '%Y-%m-%dT%H:%M:%S.%fZ')
             contest_end_time = datetime.strptime(contest['end_time'], '%Y-%m-%dT%H:%M:%S.%fZ')
             contest_url = contest['url']
+            url_contest_name = contest_name.replace(" ", "+")
+            new_contest_start_time = str(contest_start_time) +  " UTC"
+            new_contest_end_time = str(contest_end_time) + " UTC"
+            convertedStartTime = convertToGoogleCalendarTime(new_contest_start_time) 
+            convertedEndTime = convertToGoogleCalendarTime(new_contest_end_time)
+            remind_me = "https://calendar.google.com/calendar/u/0/r/eventedit?text=" + url_contest_name + "&dates=" + convertedStartTime + "/" + convertedEndTime
             desc += (f'`{em}{contest_name}{em} |'
             f'{em}{contest_start_time}{em}UTC |'
             f'{em}{contest_end_time}{em}UTC |'
-            f'{em}`[`link {sq}`]({contest_url} "Link to contest page")')
+            f'{em}`[`link {sq}`]({contest_url} "Link to contest page")|')
+            desc += (f'{em}[`remind {sq}`]({remind_me})')
             desc += newline
         return desc
 
@@ -55,10 +72,17 @@ def contestHost(host):
             contest_start_time = datetime.strptime(contest['start_time'], '%Y-%m-%dT%H:%M:%S.%fZ')
             contest_end_time = datetime.strptime(contest['end_time'], '%Y-%m-%dT%H:%M:%S.%fZ')
             contest_url = contest['url']
+            url_contest_name = contest_name.replace(" ", "+")
+            new_contest_start_time = str(contest_start_time) +  " UTC"
+            new_contest_end_time = str(contest_end_time) + " UTC"
+            convertedStartTime = convertToGoogleCalendarTime(new_contest_start_time) 
+            convertedEndTime = convertToGoogleCalendarTime(new_contest_end_time)
+            remind_me = "https://calendar.google.com/calendar/u/0/r/eventedit?text=" + url_contest_name + "&dates=" + convertedStartTime + "/" + convertedEndTime
             desc += (f'`{em}{contest_name}{em} |'
             f'{em}{contest_start_time}{em}UTC |'
             f'{em}{contest_end_time}{em}UTC |'
-            f'{em}`[`link {sq}`]({contest_url} "Link to contest page")')
+            f'{em}`[`link {sq}`]({contest_url} "Link to contest page")|')
+            desc += (f'{em}[`remind {sq}`]({remind_me})')
             desc += newline
         return desc
 
@@ -70,9 +94,16 @@ def contestHost(host):
             contest_start_time = datetime.strptime(contest['start_time'], '%Y-%m-%dT%H:%M:%S.%fZ')
             contest_end_time = datetime.strptime(contest['end_time'], '%Y-%m-%dT%H:%M:%S.%fZ')
             contest_url = contest['url']
+            url_contest_name = contest_name.replace(" ", "+")
+            new_contest_start_time = str(contest_start_time) +  " UTC"
+            new_contest_end_time = str(contest_end_time) + " UTC"
+            convertedStartTime = convertToGoogleCalendarTime(new_contest_start_time) 
+            convertedEndTime = convertToGoogleCalendarTime(new_contest_end_time)
+            remind_me = "https://calendar.google.com/calendar/u/0/r/eventedit?text=" + url_contest_name + "&dates=" + convertedStartTime + "/" + convertedEndTime
             desc += (f'`{em}{contest_name}{em} |'
             f'{em}{contest_start_time}{em}UTC |'
             f'{em}{contest_end_time}{em}UTC |'
-            f'{em}`[`link {sq}`]({contest_url} "Link to contest page")')
+            f'{em}`[`link {sq}`]({contest_url} "Link to contest page")|')
+            desc += (f'{em}[`remind {sq}`]({remind_me})')
             desc += newline
         return desc

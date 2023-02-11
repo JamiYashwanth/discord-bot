@@ -38,6 +38,7 @@ async def on_message(message):
         obj = User(user, host) 
         data = obj.get_info()
         embededMessage = discord.Embed(title="Profile", description=data, color=0x00ff00, )
+        embededMessage.set_image(url = obj._image)
         await message.channel.send(embed=embededMessage)
         return
 
