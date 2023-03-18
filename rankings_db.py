@@ -17,8 +17,6 @@ for contest in dir_list:
             userName = divExcle[row][1].value
             totalScore = int(divExcle[row][2].value)
             totalTime = divExcle[row][3].value
-            # print("rank=",type(int(contestRank)))
-            # break
             updateToDb(userName, contest_id, contestRank, division, 'Codechef', totalScore, totalTime)
 
-print("Succesfully uploaded to database")
+# print("Succesfully uploaded to database")

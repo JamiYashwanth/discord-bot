@@ -1,16 +1,41 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from selenium import webdriver
+from pymongo import MongoClient, ASCENDING, errors
 from selenium.webdriver.common.keys import Keys
 import time
-from openpyxl import Workbook,load_workbook
+from openpyxl import Workbook, load_workbook
 from bs4 import BeautifulSoup
+# from test import *
+from convert_mongodata_to_excle import *
+client = MongoClient('mongodb+srv://19l31a0581:g3smA6k95jF1vgBx@cluster0.9mhf5ll.mongodb.net/test')
+db = client['contestDetails']
+collection = db['ranklists']
 
 
+def data_into_db(user_data):
+    # print("userData=",user_data)
 
-def scrape(contest_id,div):
-    url = f'https://www.codechef.com/rankings/{contest_id + div}?filterBy=Institution%3DVignan%27s%20Institute%20Of%20Information%20Technology%2C%20Visakhapatnam&itemsPerPage=100&order=asc&page=1&sortBy=rank'
+    index_name = "user_contest_and_division_as_index"
+    index_fields = [("Username", ASCENDING), ("contest", ASCENDING), ("division", ASCENDING)]
+    index_options = {
+        'unique': True,
+        'name': index_name
+    }
+    try:
+        collection.create_index(index_fields, **index_options)
+    except errors.OperationFailure as e:
+        print(f"Index creation failed: {e.details['errmsg']}")
+
+    try:
+        collection.insert_many(user_data)
+    except:
+        pass
+
+def scrape_page(url,contest_id,div):
+    # print(f'scraping {url}')
     op = webdriver.ChromeOptions()
     op.add_argument('headless')
-    driver = webdriver.Chrome('./chromedriver',options=op)
+    driver = webdriver.Chrome('./chromedriver', options=op)
     driver.get(url)
     time.sleep(5)
 
@@ -24,33 +49,40 @@ def scrape(contest_id,div):
         userRank = user_list.find('p', class_="MuiTypography-root")
         row = user_list.find_all('td', class_="MuiTableCell-root")
         if ((username != None)):
-            user.append(userRank.text)  # rank
-            user.append(username.text)  # username
-            user.append((row[2].text)[11:])  # total score
-            user.append((row[3].text)[7:])  # total time
+            user = {
+                'Rank': userRank.text,
+                'Username': username.text,
+                'Total score': (row[2].text)[11:],
+                'Total time': (row[3].text)[7:],
+                'contest': contest_id,
+                'division': f'Div {div}'
+            }
             user_data.append(user)
+    data_into_db(user_data)
 
-    try:
-        wb=load_workbook(f'C:/Users/jamiy/PycharmProjects/pythonProject/contests_ranklists/{contest_id}_rankings.xlsx')
-    except:
-        wb = Workbook()
-        wb.save(f'C:/Users/jamiy/PycharmProjects/pythonProject/contests_ranklists/{contest_id}_rankings.xlsx')
-    try:
-        wb[f'Div {div}']
-    except:
-        wb.create_sheet(f'Div {div}')
-    try:
-        wb['Sheet']
-        del wb['Sheet']
-    except:
-        print()
-    ws = wb[f'Div {div}']
-    ws.delete_rows(0, ws.max_row - 1)
-    row = ['Rank', 'Username', 'Total score', 'Total time']
-    ws.append(row)
-    if len(user_data) > 0:
-        for data in user_data:
-            ws.append(data)
-    wb.save(f'C:/Users/jamiy/PycharmProjects/pythonProject/contests_ranklists/{contest_id}_rankings.xlsx')
+def scrape(contest_id, div):
+    checkIfAlreadyScraped = len(list(collection.find({'contest' : contest_id,'division' : f'Div {div}'})))
+    # print(f'{contest_id} {div} {checkIfAlreadyScraped}')
+    if(checkIfAlreadyScraped == 0):
+        # print("entered")
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            urls = [
+                f'https://www.codechef.com/rankings/{contest_id + div}?filterBy=Institution%3DVignan%27s%20Institute%20Of%20Information%20Technology%2C%20Visakhapatnam&itemsPerPage=100&order=asc&page={pageNo}&sortBy=rank'
+                for pageNo in range(1, 6)
+            ]
+            futures = [executor.submit(scrape_page(url,contest_id,div), url) for url in urls]
+            for future in as_completed(futures):
+                pass
+        print(f'Succesfully scraped {contest_id}{div} and inserted into db')
 
+def scrape_all_contests():
+    contest_type = 'START'
+    division = ['A', 'B', 'C', 'D']
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        for contest_id in range(38, 39):
+            print(f'Scraping {contest_type}{contest_id} in progress...')
+            for div in division:
+                executor.submit(scrape, contest_type + str(contest_id), div)
+    print("Successfully scraped and inserted to db")
 
+# scrape_all_contests()

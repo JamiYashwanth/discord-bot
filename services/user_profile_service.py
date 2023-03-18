@@ -34,7 +34,6 @@ class User:
         ranks = r.html.find('.rating-ranks',first=True).find('strong')
         global_rank = ranks[0].text
         country_rank = ranks[1].text
-        print(rating_header, rating)
         return {'name': Name, 'rating':rating,'max_rating':max_rating,
                 'global_rank':global_rank,'country_rank':country_rank
                 }
