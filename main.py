@@ -6,6 +6,7 @@ import os
 from services.future_constest_service import *
 from services.user_profile_service import *
 from discord.ext import commands
+import asyncio
 
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix='#', intents=intents)
@@ -24,10 +25,16 @@ async def rankings_command(message):
     user_message = str(message.content)
     await message.channel.send('Generating Excel sheet , Please wait for some time....')
     contest_id = user_message.split(' ')[1].upper()
+    print(contest_id)
     if(check_if_contest_exists_in_db(contest_id)):
         convert_to_excel(contest_id)
         channel = bot.get_channel(1081879142636736572)
-        await channel.send(file=discord.File(f'ranklist.xlsx'))
+        os.rename('ranklist.xlsx',f'${contest_id}.xlsx')
+        # embed = discord.Embed(title=f'${contest_id} ranklist', description=discord.File(f'${contest_id}.xlsx'), color=discord.Color.green())
+        message_ = f'{contest_id} rankings'
+        await channel.send(message_)
+        await channel.send(file=discord.File(f'${contest_id}.xlsx'))
+        os.rename(f'${contest_id}.xlsx','ranklist.xlsx')
     else:
         scrape(contest_id,'A')
         scrape(contest_id,'B')
@@ -94,5 +101,42 @@ async def user(message):
     await wait_message.delete()
     await message.channel.send(embed=embededMessage)
 
+# async def rankings_commad(message):
+#     print(message)
+#     message=message.message
+#     user_message = str(message.content)
+#     await message.channel.send('Generating Excel sheet , Please wait for some time....')
+#     contest_id = user_message.split(' ')[1].upper()
+#     print(contest_id)
+#     print("yes")
+#     if(check_if_contest_exists_in_db(contest_id)):
+#         convert_to_excel(contest_id)
+#         channel = bot.get_channel(1081879142636736572)
+#         os.rename('ranklist.xlsx',f'${contest_id}.xlsx')
+#         # embed = discord.Embed(title=f'${contest_id} ranklist', description=discord.File(f'${contest_id}.xlsx'), color=discord.Color.green())
+#         message_ = f'{contest_id} rankings'
+#         await channel.send(message_)
+#         await channel.send(file=discord.File(f'${contest_id}.xlsx'))
+#         os.rename(f'${contest_id}.xlsx','ranklist.xlsx')
+#     else:
+#         scrape(contest_id,'A')
+#         scrape(contest_id,'B')
+#         scrape(contest_id,'C')
+#         scrape(contest_id,'D')
+#         convert_to_excel(contest_id)
+#         channel = bot.get_channel(1081879142636736572)
+#         await channel.send(file=discord.File(f'ranklist.xlsx'))
+# # async def kk():
+# async def kk():
+#     for i in range (0,79):
+#         contest_id = f'START{i}'
+#         mesage_=f'#rankings {contest_id}'
+#         print("mesage_",mesage_)
+#         await rankings_commad(mesage_)
+# kk();
+
+
 bot.run(TOKEN)
+
+
 
