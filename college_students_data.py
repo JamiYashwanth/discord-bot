@@ -5,9 +5,10 @@ from selenium.webdriver.common.keys import Keys
 import time
 from openpyxl import Workbook, load_workbook
 from bs4 import BeautifulSoup
+import certifi
 # from test import *
 from convert_mongodata_to_excle import *
-client = MongoClient('mongodb+srv://19l31a0581:fenA5B7Qr9FtFjw5@cluster0.9mhf5ll.mongodb.net/test')
+client = MongoClient('mongodb+srv://19l31a0581:fenA5B7Qr9FtFjw5@cluster0.9mhf5ll.mongodb.net/test', tlsCAFile=certifi.where())
 db = client['contestDetails']
 collection = db['users']
 

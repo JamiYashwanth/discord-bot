@@ -1,12 +1,15 @@
 from openpyxl.reader.excel import load_workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 from pymongo import MongoClient
+import certifi
 import pandas as pd
-from openpyxl import Workbook
+from openpyxl import Workbook 
+from openpyxl.styles import PatternFill, Alignment, Side, Border
 
 
 
-client = MongoClient('mongodb+srv://19l31a0581:fenA5B7Qr9FtFjw5@cluster0.9mhf5ll.mongodb.net/test')
+
+client = MongoClient('mongodb+srv://19l31a0581:fenA5B7Qr9FtFjw5@cluster0.9mhf5ll.mongodb.net/test', tlsCAFile=certifi.where())
 db = client['contestDetails']
 collection = db['ranklists']
 
@@ -73,6 +76,36 @@ def convert_to_excel(contest_id):
             ws.append(r)
 
         # Save the workbook to a file
+        for col in ws.columns: 
+            for cell in col:
+                alignment_obj = cell.alignment.copy(horizontal='center', vertical='center')
+                cell.alignment = alignment_obj
+        double = Side(border_style="double", color="000000")
+        ws['A1'].fill = PatternFill('solid', fgColor='FFFF00')
+        ws['A1'].alignment = Alignment(horizontal='center')
+        ws['A1'].border = Border(top=double, left=double, right=double, bottom=double)
+        ws.column_dimensions['A'].width = 20
+
+        ws['B1'].fill = PatternFill('solid', fgColor='FFFF00')
+        ws['B1'].alignment = Alignment(horizontal='center')
+        ws['B1'].border = Border(top=double, left=double, right=double, bottom=double)
+        ws.column_dimensions['B'].width = 20
+
+        ws['C1'].fill = PatternFill('solid', fgColor='FFFF00')
+        ws['C1'].alignment = Alignment(horizontal='center')
+        ws['C1'].border = Border(top=double, left=double, right=double, bottom=double)
+        ws.column_dimensions['C'].width = 20
+
+        ws['D1'].fill = PatternFill('solid', fgColor='FFFF00')
+        ws['D1'].alignment = Alignment(horizontal='center')
+        ws['D1'].border = Border(top=double, left=double, right=double, bottom=double)
+        ws.column_dimensions['D'].width = 20
+
+        ws['E1'].fill = PatternFill('solid', fgColor='FFFF00')
+        ws['E1'].alignment = Alignment(horizontal='center')
+        ws['E1'].border = Border(top=double, left=double, right=double, bottom=double)
+        ws.column_dimensions['E'].width = 20
+        
         wb.save('ranklist.xlsx')
 
 

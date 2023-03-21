@@ -1,8 +1,8 @@
 from pymongo import MongoClient
 import matplotlib.pyplot as plt
 import numpy as np 
-
-client = MongoClient('mongodb+srv://19l31a0581:fenA5B7Qr9FtFjw5@cluster0.9mhf5ll.mongodb.net/test')
+import certifi
+client = MongoClient('mongodb+srv://19l31a0581:fenA5B7Qr9FtFjw5@cluster0.9mhf5ll.mongodb.net/test', tlsCAFile=certifi.where())
 db = client['contestDetails']
 collection = db['ranklists']
 
@@ -174,7 +174,7 @@ def graphsGenerationComparision(userName1,userName2,duration):
         for data in range(len(result1)-1,len(result1)-6,-1):
             x.append(result1[data]['contest'])
             y.append(result1[data]['Rank'])
-            if(result1[data]['Rank'] < bestRank):
+            if(int(result1[data]['Rank']) < int(bestRank)):
                 bestRank = result1[data]['Rank']
                 bestIdx = idx
             idx+=1
@@ -198,7 +198,7 @@ def graphsGenerationComparision(userName1,userName2,duration):
         for data in range(len(result2)-1,len(result2)-6,-1):
             # x.append(result2[data]['contest'])
             y1.append(result2[data]['Rank'])
-            if(result2[data]['Rank'] < bestRank):
+            if(int(result2[data]['Rank']) < int(bestRank)):
                 bestRank = result2[data]['Rank']
                 bestIdx = idx
             idx+=1
