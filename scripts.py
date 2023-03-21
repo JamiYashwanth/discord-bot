@@ -1,7 +1,7 @@
 from pymongo import MongoClient
+import certifi
 
-
-client = MongoClient('mongodb+srv://19l31a0581:fenA5B7Qr9FtFjw5@cluster0.9mhf5ll.mongodb.net/test')
+client = MongoClient('mongodb+srv://19l31a0581:fenA5B7Qr9FtFjw5@cluster0.9mhf5ll.mongodb.net/test', tlsCAFile=certifi.where())
 db = client['contestDetails']
 collection = db['ranklists']
 

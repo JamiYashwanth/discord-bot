@@ -7,7 +7,8 @@ from openpyxl import Workbook, load_workbook
 from bs4 import BeautifulSoup
 # from test import *
 from convert_mongodata_to_excle import *
-client = MongoClient('mongodb+srv://19l31a0581:fenA5B7Qr9FtFjw5@cluster0.9mhf5ll.mongodb.net/test')
+import certifi
+client = MongoClient('mongodb+srv://19l31a0581:fenA5B7Qr9FtFjw5@cluster0.9mhf5ll.mongodb.net/test', tlsCAFile=certifi.where())
 db = client['contestDetails']
 collection = db['ranklists']
 
@@ -50,7 +51,7 @@ def scrape_page(url,contest_id,div):
         row = user_list.find_all('td', class_="MuiTableCell-root")
         if ((username != None)):
             user = {
-                'Rank': userRank.text,
+                'Rank': int(userRank.text),
                 'Username': username.text,
                 'Total score': (row[2].text)[11:],
                 'Total time': (row[3].text)[7:],
