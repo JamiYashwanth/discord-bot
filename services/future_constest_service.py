@@ -10,7 +10,6 @@ def getFutureContest(url):
     return parse_json
 
 def convertToGoogleCalendarTime(t):
-    # https://calendar.google.com/calendar/u/0/r/eventedit?text=DOLO+650&dates=20220121T224000Z/20220122T221500Z&details=Can+set+your+prior+time&location=Waldorf+Astoria,+301+Park+Ave+,+New+York,+NY+10022&sf=true&output=xml
     dt = datetime.strptime(t, "%Y-%m-%d %H:%M:%S %Z")
     time_string_converted = dt.strftime("%Y%m%dT%H%M%SZ")
     return time_string_converted
