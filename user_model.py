@@ -219,5 +219,5 @@ def graphGenerationUser(userName,duration):
 
 # overallStats('Codechef','sayi_hrudai')
 # graphsGeneration('sayi_hrudai','recent')
-graphsGenerationComparision('sayi_hrudai','nikola_tesla_7','recent')
+# graphsGenerationComparision('sayi_hrudai','nikola_tesla_7','recent')
 # client.close()

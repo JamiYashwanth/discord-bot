@@ -13,6 +13,90 @@ client = MongoClient('mongodb+srv://19l31a0581:fenA5B7Qr9FtFjw5@cluster0.9mhf5ll
 db = client['contestDetails']
 collection = db['ranklists']
 
+def ranklist_by_year():
+    # Load the Excel workbook
+    divs = ['Div A','Div B','Div C','Div D']
+    years = ['I Year','II Year','III Year','IV Year']
+
+    for year in years:
+        first_year=[]
+        second_year=[]
+        third_year=[]
+        fourth_year=[]
+        wb = load_workbook('ranklist.xlsx')
+        for div in divs:
+            # Select the worksheet you want to read
+            ws = wb[f'{div}']
+
+            # Iterate through the rows
+            for row in ws.iter_rows(min_row=1, values_only=True):
+                if(len(row)<7): break
+                if(row[7]=='I Year'): 
+                    temp_row = tuple(list(row) + [f'{div}'])
+                    first_year.append(temp_row)
+                if(row[7]=='II Year'): 
+                    temp_row = tuple(list(row) + [f'{div}'])
+                    second_year.append(temp_row)
+                if(row[7]=='III Year'): 
+                    temp_row = tuple(list(row) + [f'{div}'])
+                    third_year.append(temp_row)
+                if(row[7]=='IV Year'): 
+                    temp_row = tuple(list(row) + [f'{div}'])
+                    fourth_year.append(temp_row)
+        try:
+            wb = load_workbook('Yearwise_ranklist.xlsx')
+        except:
+            wb = Workbook()
+            wb.save('Yearwise_ranklist.xlsx')
+        try:
+            del wb['Sheet']
+        except:
+            pass
+        try:
+            del wb[year]
+            wb.create_sheet(year)
+        except:
+            wb.create_sheet(year)
+        ws = wb[year]
+        print(year)
+        col_tup=('Rank','UserId','Total Score','Total Time','Name','Roll number','Branch','Year','Section','Profile url','Division')
+        if(year == 'I Year') : 
+            first_year.insert(0,col_tup)
+            df = pd.DataFrame(first_year)
+        if(year == 'II Year') :
+            second_year.insert(0,col_tup)
+            df = pd.DataFrame(second_year)
+        if(year == 'III Year') : 
+            third_year.insert(0,col_tup)
+            df = pd.DataFrame(third_year)
+        if(year == 'IV Year') : 
+            fourth_year.insert(0,col_tup)
+            df = pd.DataFrame(fourth_year)
+        print(len(df))
+        if len(df)==1:
+            ws.column_dimensions['A'].width = 30
+            ws['A1']=f'No participants in {year}'
+        else:
+            for r in dataframe_to_rows(df, index=False, header=False):
+                # print("r=",r)
+                ws.append(r)
+
+            # Save the workbook to a file
+            for col in ws.columns: 
+                for cell in col:
+                    alignment_obj = cell.alignment.copy(horizontal='center', vertical='center')
+                    cell.alignment = alignment_obj
+            double = Side(border_style="double", color="000000")
+
+            col = ['A','B','C','D','E','F','G','H','I','J','K']
+            for column in col:
+                ws[f'{column}1'].fill = PatternFill('solid', fgColor='FFFF00')
+                ws[f'{column}1'].alignment = Alignment(horizontal='center')
+                ws[f'{column}1'].border = Border(top=double, left=double, right=double, bottom=double)
+                if column!='J' and column!='E': ws.column_dimensions[f'{column}'].width = 20
+                else: ws.column_dimensions[f'{column}'].width = 40
+        wb.save('Yearwise_ranklist.xlsx')
+
 
 def convert_to_excel(contest_id):
     # Retrieve all data from the collection
@@ -40,15 +124,31 @@ def convert_to_excel(contest_id):
             }
         ]))
         # print("data=",data)
-        userCollection = db['users']
+        userCollection = db['codechef_users']
         for user in data : 
             username = user['Username']
             rollnumber = '-'
+            name = '-'
+            branch = '-'
+            section = '-'
+            year = '-'
+            codechefUrl = '-'
             try:
-                rollnumber = list(userCollection.find({'codechefId' : username}))[0]['collegeId']
+                userdata = list(userCollection.find({'userId' : username}))[0]
+                name = userdata['name']
+                rollnumber = userdata['rollNo']
+                branch = userdata['branch']
+                section = userdata['section']
+                year = userdata['year']
+                codechefUrl = userdata['url']
             except:
                 pass
+            user['Name'] = name
             user['Roll number'] = rollnumber
+            user['Branch'] = branch
+            user['year'] = year
+            user['section'] = section
+            user['codechefUrl'] = codechefUrl
         # print('div=',div)
         # print("total_cout=",data)
         # Convert the data to a DataFrame
@@ -71,41 +171,54 @@ def convert_to_excel(contest_id):
         except:
             wb.create_sheet(div)
         ws = wb[div]
-        for r in dataframe_to_rows(df, index=False, header=True):
-            # print("r=",r)
-            ws.append(r)
 
-        # Save the workbook to a file
-        for col in ws.columns: 
-            for cell in col:
-                alignment_obj = cell.alignment.copy(horizontal='center', vertical='center')
-                cell.alignment = alignment_obj
-        double = Side(border_style="double", color="000000")
-        ws['A1'].fill = PatternFill('solid', fgColor='FFFF00')
-        ws['A1'].alignment = Alignment(horizontal='center')
-        ws['A1'].border = Border(top=double, left=double, right=double, bottom=double)
-        ws.column_dimensions['A'].width = 20
+        if df.empty:
+            ws.column_dimensions['A'].width = 30
+            ws['A1']=f'No participants in {div}'
+        else:
+            for r in dataframe_to_rows(df, index=False, header=True):
+                # print("r=",r)
+                ws.append(r)
 
-        ws['B1'].fill = PatternFill('solid', fgColor='FFFF00')
-        ws['B1'].alignment = Alignment(horizontal='center')
-        ws['B1'].border = Border(top=double, left=double, right=double, bottom=double)
-        ws.column_dimensions['B'].width = 20
+            # Save the workbook to a file
+            for col in ws.columns: 
+                for cell in col:
+                    alignment_obj = cell.alignment.copy(horizontal='center', vertical='center')
+                    cell.alignment = alignment_obj
+            double = Side(border_style="double", color="000000")
 
-        ws['C1'].fill = PatternFill('solid', fgColor='FFFF00')
-        ws['C1'].alignment = Alignment(horizontal='center')
-        ws['C1'].border = Border(top=double, left=double, right=double, bottom=double)
-        ws.column_dimensions['C'].width = 20
+            col = ['A','B','C','D','E','F','G','H','I','J']
+            for column in col:
+                ws[f'{column}1'].fill = PatternFill('solid', fgColor='FFFF00')
+                ws[f'{column}1'].alignment = Alignment(horizontal='center')
+                ws[f'{column}1'].border = Border(top=double, left=double, right=double, bottom=double)
+                if column!='J' and column!='E': ws.column_dimensions[f'{column}'].width = 20
+                else: ws.column_dimensions[f'{column}'].width = 40
+            # ws['A1'].fill = PatternFill('solid', fgColor='FFFF00')
+            # ws['A1'].alignment = Alignment(horizontal='center')
+            # ws['A1'].border = Border(top=double, left=double, right=double, bottom=double)
+            # ws.column_dimensions['A'].width = 20
 
-        ws['D1'].fill = PatternFill('solid', fgColor='FFFF00')
-        ws['D1'].alignment = Alignment(horizontal='center')
-        ws['D1'].border = Border(top=double, left=double, right=double, bottom=double)
-        ws.column_dimensions['D'].width = 20
+            # ws['B1'].fill = PatternFill('solid', fgColor='FFFF00')
+            # ws['B1'].alignment = Alignment(horizontal='center')
+            # ws['B1'].border = Border(top=double, left=double, right=double, bottom=double)
+            # ws.column_dimensions['B'].width = 20
 
-        ws['E1'].fill = PatternFill('solid', fgColor='FFFF00')
-        ws['E1'].alignment = Alignment(horizontal='center')
-        ws['E1'].border = Border(top=double, left=double, right=double, bottom=double)
-        ws.column_dimensions['E'].width = 20
-        
+            # ws['C1'].fill = PatternFill('solid', fgColor='FFFF00')
+            # ws['C1'].alignment = Alignment(horizontal='center')
+            # ws['C1'].border = Border(top=double, left=double, right=double, bottom=double)
+            # ws.column_dimensions['C'].width = 20
+
+            # ws['D1'].fill = PatternFill('solid', fgColor='FFFF00')
+            # ws['D1'].alignment = Alignment(horizontal='center')
+            # ws['D1'].border = Border(top=double, left=double, right=double, bottom=double)
+            # ws.column_dimensions['D'].width = 20
+
+            # ws['E1'].fill = PatternFill('solid', fgColor='FFFF00')
+            # ws['E1'].alignment = Alignment(horizontal='center')
+            # ws['E1'].border = Border(top=double, left=double, right=double, bottom=double)
+            # ws.column_dimensions['E'].width = 20
+            
         wb.save('ranklist.xlsx')
 
 
@@ -122,3 +235,5 @@ def check_if_contest_exists_in_db(contest_id):
     return 0
 
 # convert_to_excel("START78")
+
+# ranklist_by_year();
